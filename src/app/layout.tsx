@@ -19,7 +19,7 @@ const RootLayout = ({
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link
           rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css"
+          href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/variable/pretendardvariable.css"
         />
       </head>
       <body className="antialiased">
