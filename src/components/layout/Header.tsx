@@ -1,4 +1,5 @@
 "use client";
+import CreateSpaceDialog from "@/components/space/CreateSpaceDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +15,15 @@ import Link from "next/link";
 
 type HeaderProps = {
   currentSpace?: string;
+  spaces?: { id: string; name: string; slug: string }[];
+  defaultCreateOpen?: boolean;
 };
 
-const Header = ({ currentSpace = "My Space" }: HeaderProps) => {
+const Header = ({
+  currentSpace = "My Space",
+  spaces = [],
+  defaultCreateOpen = false,
+}: HeaderProps) => {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:h-16 md:px-6">
       <div className="flex items-center gap-2">
@@ -30,15 +37,16 @@ const Header = ({ currentSpace = "My Space" }: HeaderProps) => {
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel>Switch Space</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="#">Roommates</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="#">Family</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="#">Couple</Link>
-            </DropdownMenuItem>
+            {spaces.map((s) => (
+              <DropdownMenuItem key={s.id} asChild>
+                <Link href={`/${s.slug}`}>{s.name}</Link>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <CreateSpaceDialog
+              triggerClassName="w-full justify-start gap-2"
+              defaultOpen={defaultCreateOpen}
+            />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
