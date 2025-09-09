@@ -8,13 +8,13 @@ interface FileUploadProps extends React.HTMLAttributes<HTMLDivElement> {
   accept?: string;
 }
 
-export function FileUpload({
+export const FileUpload = ({
   className,
   onFileChange,
   accept = "image/*",
   children,
   ...props
-}: FileUploadProps) {
+}: FileUploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -47,4 +47,4 @@ export function FileUpload({
       {children}
     </div>
   );
-}
+};
