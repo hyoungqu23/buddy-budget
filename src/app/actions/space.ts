@@ -36,26 +36,42 @@ export const createSpace = async (formData: FormData) => {
   }
 
   const userId = await getCurrentUserId();
+
   if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  // generate unique slug (basic retry)
-  let slug = slugify(name);
-  for (let i = 0; i < 3; i++) {
+  // generate unique slug with transaction and retries on conflict
+  let lastError: unknown = null;
+  for (let i = 0; i < 5; i++) {
+    const slug = slugify(name);
     try {
-      const [sp] = await db
-        .insert(spaces)
-        .values({ name, slug, ownerId: userId })
-        .returning({ id: spaces.id, slug: spaces.slug });
-      await db
-        .insert(spaceMembers)
-        .values({ spaceId: sp.id, userId, role: "owner" });
-      redirect(`/${sp.slug}`);
-    } catch (e) {
-      // collision -> retry with new slug
-      slug = slugify(name);
+      const result = await db.transaction(async (tx) => {
+        const [sp] = await tx
+          .insert(spaces)
+          .values({ name, slug, ownerId: userId })
+          .returning({ id: spaces.id, slug: spaces.slug });
+        await tx
+          .insert(spaceMembers)
+          .values({ spaceId: sp.id, userId, role: "owner" });
+        return sp;
+      });
+      redirect(`/${result.slug}`);
+    } catch (e: any) {
+      lastError = e;
+      const msg = String(e?.message || "");
+      if (
+        msg.includes("spaces_slug_unique") ||
+        msg.includes("duplicate key") ||
+        msg.includes("unique")
+      ) {
+        continue;
+      }
+      break;
     }
   }
-  throw new Error("Failed to create space");
+  throw new Error(
+    "Failed to create space" +
+      (lastError ? `: ${String((lastError as any)?.message || lastError)}` : "")
+  );
 };

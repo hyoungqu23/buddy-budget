@@ -47,8 +47,8 @@ const DialogHeader = ({
 const DialogTitle = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h3
+}: DialogPrimitive.DialogTitleProps) => (
+  <DialogPrimitive.Title
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
       className
@@ -60,8 +60,11 @@ const DialogTitle = ({
 const DialogDescription = ({
   className,
   ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={cn("text-sm text-muted-foreground", className)} {...props} />
+}: DialogPrimitive.DialogDescriptionProps) => (
+  <DialogPrimitive.Description
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
 );
 
 export {

@@ -43,10 +43,13 @@ const Header = ({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <CreateSpaceDialog
-              triggerClassName="w-full justify-start gap-2"
-              defaultOpen={defaultCreateOpen}
-            />
+            <DropdownMenuItem asChild>
+              <CreateSpaceDialog defaultOpen={defaultCreateOpen}>
+                <span className="flex w-full items-center gap-2">
+                  새 스페이스 만들기
+                </span>
+              </CreateSpaceDialog>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

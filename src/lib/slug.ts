@@ -12,6 +12,7 @@ const toAscii = (s: string) =>
 
 export const slugify = (name: string) => {
   const base = toAscii(name) || "space";
-  const rand = Math.random().toString(36).slice(2, 8);
+  const rand = nanoid(8).toLowerCase();
   return `${base}-${rand}`;
 };
+import { nanoid } from "nanoid";

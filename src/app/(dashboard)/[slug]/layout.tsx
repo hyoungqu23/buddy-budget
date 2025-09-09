@@ -2,14 +2,14 @@ import BottomNav from "@/components/layout/BottomNav";
 import HeaderServer from "@/components/layout/HeaderServer";
 import Sidebar from "@/components/layout/Sidebar";
 
-const DashboardLayout = ({
+const DashboardLayout = async ({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) => {
-  const { slug } = params;
+  const { slug } = await params;
   return (
     <div className="min-h-dvh">
       {/* 서버에서 사용자 스페이스 목록 조회 */}

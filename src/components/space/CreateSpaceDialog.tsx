@@ -1,4 +1,5 @@
 "use client";
+
 import { createSpace } from "@/app/actions/space";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,11 +30,13 @@ const schema = z.object({
 type Props = {
   defaultOpen?: boolean;
   triggerClassName?: string;
+  children?: React.ReactNode;
 };
 
 const CreateSpaceDialog = ({
   defaultOpen = false,
   triggerClassName,
+  children,
 }: Props) => {
   const [open, setOpen] = useState(Boolean(defaultOpen));
   const form = useForm<z.infer<typeof schema>>({
@@ -44,9 +47,13 @@ const CreateSpaceDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className={triggerClassName}>
-          새 스페이스 만들기
-        </Button>
+        {children ? (
+          children
+        ) : (
+          <Button variant="secondary" className={triggerClassName}>
+            새 스페이스 만들기
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
