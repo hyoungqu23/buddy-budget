@@ -1,0 +1,265 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# BuddyBudget Information Architecture (IA)
+
+## 1. 사이트맵
+
+```
+/ (홈페이지)
+├── /auth
+│   ├── /auth/signin (로그인)
+│   └── /auth/signup (회원가입)
+├── /[slug] (스페이스 대시보드)
+│   ├── /[slug]/transactions (거래 내역)
+│   │   ├── /[slug]/transactions/new (새 거래 등록)
+│   │   └── /[slug]/transactions/[id]/edit (거래 수정)
+│   ├── /[slug]/accounts (계정 관리)
+│   │   ├── /[slug]/accounts/new (새 계정 등록)
+│   │   └── /[slug]/accounts/[id]/edit (계정 수정)
+│   ├── /[slug]/categories (카테고리 관리)
+│   │   ├── /[slug]/categories/new (새 카테고리 등록)
+│   │   └── /[slug]/categories/[id]/edit (카테고리 수정)
+│   ├── /[slug]/budgets (예산 관리)
+│   │   └── /[slug]/budgets/setup (예산 설정)
+│   └── /[slug]/settings (스페이스 설정)
+│       ├── /[slug]/settings/general (일반 설정)
+│       ├── /[slug]/settings/members (멤버 관리)
+│       ├── /[slug]/settings/billing (결제 및 플랜)
+│       ├── /[slug]/settings/notifications (알림 설정)
+│       └── /[slug]/settings/appearance (화면 설정)
+├── /create-space (새 스페이스 생성)
+├── /accept-invite/[token] (초대 수락)
+└── /help (도움말 센터)
+```
+
+## 2. 사용자 흐름
+
+### 주요 작업: 신규 사용자 온보딩
+
+1. 사용자가 홈페이지에서 '시작하기' 버튼 클릭
+2. Google OAuth 로그인 페이지로 이동
+3. 로그인 완료 후 '새 스페이스 생성' 모달 표시
+4. 스페이스 이름 입력 (예: "신림 3인하우스")
+5. 스페이스 대시보드로 리다이렉트
+6. 3단계 온보딩 튜토리얼 진행:
+   - 1단계: 첫 거래 입력 (빠른 입력 위젯 사용)
+   - 2단계: 월 예산 설정
+   - 3단계: 룸메이트 초대
+7. 대시보드에서 실시간 잔액 및 집행률 확인
+
+### 주요 작업: 멤버 초대 및 참여
+
+1. 스페이스 소유자가 설정 > 멤버 관리 페이지 접근
+2. '멤버 초대' 버튼 클릭
+3. 초대할 사람의 이메일 주소 입력
+4. 초대 이메일 발송
+5. 피초대자가 이메일의 초대 링크 클릭
+6. Google 로그인 (신규 가입자의 경우 자동 회원가입)
+7. 스페이스 참여 확인 페이지
+8. '참여하기' 버튼 클릭
+9. 스페이스 대시보드로 이동하여 활동 시작
+
+### 주요 작업: 빠른 거래 입력
+
+1. 대시보드 상단의 빠른 입력 위젯 클릭
+2. 거래 유형 선택 (지출/수입/이체)
+3. 금액 입력 (숫자 키패드 UI)
+4. 카테고리 선택 (자주 사용하는 항목 우선 표시)
+5. 계정 선택 (현금/카드/은행계좌)
+6. 메모 입력 (선택사항)
+7. '저장' 버튼 클릭
+8. 성공 토스트 알림 표시
+9. 대시보드 잔액 및 집행률 실시간 업데이트
+
+## 3. 네비게이션 구조
+
+### 데스크톱 - 고정 사이드바 (240px)
+
+- **주요 메뉴**
+  - 대시보드 (홈 아이콘)
+  - 거래내역 (리스트 아이콘)
+  - 계정관리 (지갑 아이콘)
+  - 카테고리 (태그 아이콘)
+  - 예산관리 (파이차트 아이콘)
+- **하단 메뉴**
+  - 설정 (톱니바퀴 아이콘)
+  - 도움말 (물음표 아이콘)
+  - 다크모드 토글
+
+### 모바일 - 하단 탭 네비게이션 (64px)
+
+- 대시보드
+- 거래내역
+- 빠른입력 (+ 아이콘, 중앙 강조)
+- 계정관리
+- 설정
+
+### 글로벌 네비게이션 바 (상단)
+
+- 스페이스 선택 드롭다운 (현재 스페이스명 표시)
+- 전역 검색 (키보드 단축키: '/')
+- 알림 벨 아이콘
+- 사용자 프로필 드롭다운
+
+## 4. 페이지 계층 구조
+
+```
+/ (Depth 1)
+├── /auth (Depth 1)
+│   ├── /auth/signin (Depth 2)
+│   └── /auth/signup (Depth 2)
+├── /[slug] (Depth 1)
+│   ├── /[slug]/transactions (Depth 2)
+│   │   ├── /[slug]/transactions/new (Depth 3)
+│   │   └── /[slug]/transactions/[id]/edit (Depth 3)
+│   ├── /[slug]/accounts (Depth 2)
+│   │   ├── /[slug]/accounts/new (Depth 3)
+│   │   └── /[slug]/accounts/[id]/edit (Depth 3)
+│   ├── /[slug]/categories (Depth 2)
+│   │   ├── /[slug]/categories/new (Depth 3)
+│   │   └── /[slug]/categories/[id]/edit (Depth 3)
+│   ├── /[slug]/budgets (Depth 2)
+│   │   └── /[slug]/budgets/setup (Depth 3)
+│   └── /[slug]/settings (Depth 2)
+│       ├── /[slug]/settings/general (Depth 3)
+│       ├── /[slug]/settings/members (Depth 3)
+│       ├── /[slug]/settings/billing (Depth 3)
+│       ├── /[slug]/settings/notifications (Depth 3)
+│       └── /[slug]/settings/appearance (Depth 3)
+├── /create-space (Depth 1)
+├── /accept-invite/[token] (Depth 1)
+└── /help (Depth 1)
+```
+
+## 5. 콘텐츠 구성
+
+| 페이지         | 주요 콘텐츠 요소                                                                     |
+| -------------- | ------------------------------------------------------------------------------------ |
+| 홈페이지       | 히어로 섹션, 주요 기능 소개, CTA 버튼, 가격 정보                                     |
+| 대시보드       | 잔액 카드, 집행률 프로그레스 바, 최근 거래 목록, 빠른 입력 위젯, 예산 현황 차트      |
+| 거래내역       | 필터 및 검색 바, 거래 목록 테이블, 페이지네이션, 새 거래 등록 버튼                   |
+| 거래 입력/수정 | 거래 유형 선택, 금액 입력 필드, 카테고리 드롭다운, 계정 선택, 메모 입력, 날짜 선택기 |
+| 계정관리       | 계정 목록 카드, 각 계정별 잔액 표시, 새 계정 추가 버튼, 계정 편집/삭제 액션          |
+| 카테고리 관리  | 카테고리 목록, 색상 표시, 사용 빈도 통계, 새 카테고리 추가 버튼                      |
+| 예산관리       | 카테고리별 예산 설정 폼, 집행률 차트, 예산 초과 알림 설정                            |
+| 멤버 관리      | 현재 멤버 목록, 권한 표시, 초대 링크 생성, 멤버 제거 기능                            |
+| 설정           | 탭 메뉴, 각종 설정 폼, 다크모드 토글, 알림 설정 체크박스                             |
+
+## 6. 인터랙션 패턴
+
+### 모달 사용 패턴
+
+- **빠른 거래 입력**: 대시보드에서 즉시 접근 가능한 모달
+- **확인 대화상자**: 삭제, 초대 취소 등 중요한 액션 전 확인
+- **업그레이드 안내**: 무료 플랜 한도 초과 시 유료 플랜 안내 모달
+
+### 토스트 알림 패턴
+
+- **성공 액션**: 거래 저장, 멤버 초대 완료 등 (민트 색상)
+- **경고**: 예산 초과 위험 (노란색)
+- **오류**: 네트워크 오류, 유효성 검사 실패 (빨간색)
+
+### 무한 스크롤 패턴
+
+- 거래내역 목록에서 오래된 거래 로딩 시 사용
+
+### 툴팁 패턴
+
+- 예산 설정 페이지의 도움말 아이콘
+- 대시보드 차트의 상세 정보 표시
+
+### 드래그 앤 드롭 패턴
+
+- 카테고리 순서 변경
+- 계정 우선순위 조정
+
+## 7. URL 구조
+
+### 일반 원칙
+
+- **리소스명**: 복수형 사용 (`/transactions`, `/accounts`)
+- **상세 페이지**: `/resource-name/:id`
+- **액션 페이지**: `/resource-name/action` (예: `/transactions/new`)
+- **스페이스 기반**: 모든 주요 기능은 `/[slug]` 하위에 위치
+
+### URL 예시
+
+```
+/ (마케팅 홈페이지)
+/auth/signin
+/create-space
+/my-family-budget (스페이스 대시보드)
+/my-family-budget/transactions
+/my-family-budget/transactions/new
+/my-family-budget/transactions/123/edit
+/my-family-budget/accounts
+/my-family-budget/budgets/setup
+/my-family-budget/settings/members
+/accept-invite/abc123token
+```
+
+## 8. 컴포넌트 계층 구조
+
+### 글로벌 컴포넌트
+
+- **Header**: 스페이스 선택, 검색, 알림, 사용자 메뉴
+- **Sidebar**: 데스크톱 네비게이션 메뉴
+- **BottomNav**: 모바일 하단 탭 네비게이션
+- **Footer**: 마케팅 페이지에서만 사용
+- **Toast**: 전역 알림 시스템
+- **Modal**: 기본 모달 컨테이너
+
+### 레이아웃 컴포넌트
+
+- **DashboardLayout**: 사이드바 + 메인 콘텐츠 영역
+- **AuthLayout**: 인증 페이지용 중앙 정렬 레이아웃
+- **SettingsLayout**: 설정 페이지용 탭 레이아웃
+
+### 카드 컴포넌트
+
+- **BalanceCard**: 잔액 표시 카드
+- **BudgetCard**: 예산 집행률 카드
+- **TransactionCard**: 거래 내역 카드
+- **AccountCard**: 계정 정보 카드
+- **MemberCard**: 멤버 정보 카드
+
+### 폼 컴포넌트
+
+- **TransactionForm**: 거래 입력/수정 폼
+- **BudgetForm**: 예산 설정 폼
+- **InviteForm**: 멤버 초대 폼
+- **AccountForm**: 계정 생성/수정 폼
+
+### 데이터 표시 컴포넌트
+
+- **TransactionList**: 거래 목록 테이블
+- **BudgetChart**: 예산 현황 차트
+- **BalanceChart**: 잔액 변화 그래프
+- **CategoryPieChart**: 카테고리별 지출 파이 차트
+
+### 입력 컴포넌트
+
+- **QuickAddWidget**: 빠른 거래 입력 위젯
+- **AmountInput**: 금액 입력 필드 (천 단위 콤마 자동 적용)
+- **CategorySelect**: 카테고리 선택 드롭다운
+- **AccountSelect**: 계정 선택 드롭다운
+- **DatePicker**: 날짜 선택기
+
+### 피드백 컴포넌트
+
+- **LoadingSpinner**: 로딩 표시기
+- **EmptyState**: 빈 상태 일러스트레이션
+- **ErrorBoundary**: 오류 경계 컴포넌트
+- **ConfirmDialog**: 확인 대화상자
+
+### 유틸리티 컴포넌트
+
+- **Badge**: 상태 표시 배지
+- **ProgressBar**: 진행률 표시 바
+- **Avatar**: 사용자 프로필 이미지
+- **Tooltip**: 도움말 툴팁
+- **SearchInput**: 전역 검색 입력 필드

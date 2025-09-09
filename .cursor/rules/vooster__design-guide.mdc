@@ -1,0 +1,199 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# BuddyBudget Design Guide
+
+## 1. Overall Mood (전체적인 무드)
+
+BuddyBudget은 가족, 룸메이트, 커플이 함께 사용하는 공동 가계부 서비스로서 **친근하고 따뜻한** 무드를 추구합니다. 복잡한 금융 관리를 부담 없이 접근할 수 있도록 하며, 사용자들 간의 협업과 소통을 장려하는 친밀한 분위기를 조성합니다.
+
+전문적이면서도 접근하기 쉬운 디자인을 통해 초보자도 쉽게 사용할 수 있으면서, 숙련된 사용자에게는 효율적인 워크플로우를 제공합니다. 따뜻한 색상과 부드러운 형태를 사용하여 금융 관리라는 다소 딱딱할 수 있는 주제를 친근하게 만들어줍니다.
+
+## 2. Reference Service (참조 서비스)
+
+- **Name**: Splitwise
+- **Description**: 친구들과 룸메이트를 위한 공동 지출 관리 및 정산 앱
+- **Design Mood**: 깔끔하고 직관적이며 친근한 인터페이스로 복잡한 정산을 간단하게 만드는 디자인
+- **Primary Color**: #5BC5A7 (민트 그린)
+- **Secondary Color**: #FFFFFF (화이트)
+
+## 3. Color & Gradient (색상 & 그라데이션)
+
+- **Primary Color**: #FFB38A (따뜻한 살구색)
+- **Secondary Color**: #5ED5A8 (상쾌한 민트)
+- **Accent Color**: #FFE489 (밝은 노란색)
+- **Surface Color**: #FFF9F3 (아이보리)
+- **Text Color**: #25324A (부드러운 네이비)
+- **Gray Scale**:
+  - Gray 50: #F8FAFC
+  - Gray 100: #F1F5F9
+  - Gray 300: #CBD5E1
+  - Gray 500: #64748B
+  - Gray 700: #334155
+- **Mood**: 따뜻하고 중간 채도의 색상으로 친근함과 신뢰감을 동시에 전달
+- **Color Usage**:
+  - Primary: 주요 CTA 버튼, 그래프 하이라이트, 중요한 액션 요소
+  - Secondary: 보조 버튼, 성공 상태, 긍정적 피드백
+  - Accent: 알림, 배지, 주의 사항, 새로운 기능 강조
+  - Surface: 카드 배경, 모달 배경
+  - Text: 모든 텍스트 요소에서 WCAG AA 기준 4.5:1 대비율 확보
+
+## 4. Typography & Font (타이포그래피 & 폰트)
+
+- **Font Family**: Pretendard (한국어 최적화 폰트)
+- **Heading 1**: Pretendard SemiBold, 32px, Letter-spacing: -0.02em
+- **Heading 2**: Pretendard SemiBold, 24px, Letter-spacing: -0.01em
+- **Heading 3**: Pretendard SemiBold, 20px, Letter-spacing: -0.01em
+- **Body Large**: Pretendard Regular, 16px, Line-height: 1.5
+- **Body**: Pretendard Regular, 14px, Line-height: 1.5
+- **Caption**: Pretendard Light, 12px, Line-height: 1.4
+- **Button Text**: Pretendard Medium, 14px
+- **Font Scale**: 12/14/16/20/24/32px (Tailwind utility 기반)
+
+## 5. Layout & Structure (레이아웃 & 구조)
+
+**Grid System**:
+
+- 12컬럼 그리드 시스템 사용
+- Container max-width: 1280px
+- Gutter: 24px (desktop), 16px (mobile)
+
+**Spacing System**:
+
+- 4px 기준 spacing scale (4, 8, 12, 16, 24, 32, 48, 64px)
+- 카드 간격: 24px
+- 섹션 간격: 48px
+
+**Responsive Breakpoints**:
+
+- Mobile: ≥ 375px
+- Tablet: ≥ 768px
+- Desktop: ≥ 1024px
+- Large Desktop: ≥ 1280px
+
+**Navigation Structure**:
+
+- Desktop: 고정 사이드바 (240px width)
+- Mobile: 하단 탭 네비게이션 + 햄버거 드로어
+
+## 6. Visual Style (비주얼 스타일)
+
+**아이콘**:
+
+- Library: lucide-react
+- Style: 1.5px stroke weight, rounded caps and joins
+- 기본 색상: Soft Navy (#25324A)
+- 강조 시: Primary color fill
+
+**일러스트레이션**:
+
+- 플랫 디자인 스타일
+- 파스텔 톤의 미니멀한 캐릭터 (집, 동전 모티프)
+- 배경 일러스트는 마케팅 페이지에만 제한적 사용
+
+**이미지 처리**:
+
+- Border radius: 8px (기본), 16px (카드)
+- 그림자: shadow-sm (기본), shadow-md (호버)
+
+**애니메이션**:
+
+- Duration: 200-300ms
+- Easing: ease-out
+- 페이지 전환: Fade + Slide-up 8px
+- 성공 액션 후: Confetti 효과 (Mint + Apricot, 1초)
+
+## 7. UX Guide (UX 가이드)
+
+**초보자를 위한 UX**:
+
+- 첫 로그인 후 3단계 온보딩 튜토리얼
+- 빠른 거래 입력 위젯에 예시 플레이스홀더 제공
+- 예산 설정 페이지에 도움말 툴팁 제공
+- 도움말 센터 링크 및 '시작하기 투어' 버튼
+- 에러 메시지는 해결 방법과 함께 친근한 톤으로 제공
+
+**숙련자를 위한 UX**:
+
+- 대시보드에 핵심 KPI 카드 집중 배치
+- 키보드 단축키: 'T' (거래 입력), '/' (글로벌 검색)
+- 빠른 액션을 위한 QuickAdd 위젯
+- 고급 필터링 및 검색 기능
+
+**공통 UX 원칙**:
+
+- 3분 이내 첫 가치 체험 (TTV)
+- 30초 이내 거래 입력 완료
+- 실시간 피드백 및 상태 표시
+- 명확한 정보 계층 구조
+
+## 8. UI Component Guide (UI 컴포넌트 가이드)
+
+**버튼**:
+
+- Primary: Background #FFB38A, Text White, Border radius 8px, Padding 12px 24px
+- Secondary: Border #5ED5A8, Text #5ED5A8, Background transparent
+- Destructive: Background #EF4444, Text White
+- 호버 시: 10% 어둡게, transform scale(1.02)
+
+**입력 필드**:
+
+- Border: 1px solid #CBD5E1
+- Focus: Border #FFB38A, Box-shadow 0 0 0 3px rgba(255, 179, 138, 0.1)
+- Border radius: 8px
+- Padding: 12px 16px
+- Placeholder: #64748B
+
+**카드**:
+
+- Background: #FFF9F3 (Surface color)
+- Border radius: 12px
+- Shadow: 0 1px 3px rgba(0, 0, 0, 0.1)
+- Padding: 24px
+- 호버 시: Shadow 증가
+
+**사이드바** (Desktop):
+
+- Width: 240px
+- Collapsible 기능
+- Background: White
+- 메뉴 항목: Dashboard, 거래내역, 계좌관리, 카테고리, 예산, 설정
+
+**하단 네비게이션** (Mobile):
+
+- 고정 하단 탭: Dashboard, 거래내역, QuickAdd, 계좌관리, 설정
+- Height: 64px
+- 활성 탭: Primary color 강조
+
+**모달**:
+
+- Backdrop: rgba(0, 0, 0, 0.5)
+- Content: White background, border radius 16px
+- 최대 width: 500px
+- 애니메이션: Scale + Fade
+
+**토스트 알림**:
+
+- 성공: Secondary color 배경
+- 경고: Accent color 배경
+- 오류: Red 배경
+- 위치: 화면 우상단
+- Duration: 4초
+
+**다크 모드**:
+
+- Primary: #E59A73
+- Secondary: #4CB894
+- Surface: #1E1E1E
+- Text: #F3F5F7
+- 토글 위치: 설정 페이지 상단
+
+**접근성 고려사항**:
+
+- 모든 색상 조합에서 WCAG 2.1 AA 기준 대비율 확보
+- 모든 인터랙티브 요소에 Focus 스타일 적용
+- 폼 라벨과 aria-label 완전 지원
+- 키보드 네비게이션 지원

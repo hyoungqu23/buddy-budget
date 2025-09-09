@@ -1,5 +1,5 @@
 ---
-description: Common Guideline
+description:
 globs:
 alwaysApply: true
 ---
@@ -62,13 +62,13 @@ use following libraries for specific functionalities:
    - Problem summary and approach
    - Step-by-step solution with relevant code snippets
    - Format code changes:
-     ```language:path/to/file
-     // ... existing code ...
-     function exampleFunction() {
+   ```language:path/to/file
+   // ... existing code ...
+   function exampleFunction() {
          // Modified or new code here
-     }
-     // ... existing code ...
-     ```
+   }
+   // ... existing code ...
+   ```
    - Use appropriate formatting
    - Describe modifications
    - Conclude with potential improvements
@@ -154,11 +154,12 @@ use following libraries for specific functionalities:
 
 - if you need to add new component, please show me the installation instructions. I'll paste it into terminal.
 - example
-  ```
-  $ npx shadcn@latest add card
-  $ npx shadcn@latest add textarea
-  $ npx shadcn@latest add dialog
-  ```
+
+```
+$ npx shadcn@latest add card
+$ npx shadcn@latest add textarea
+$ npx shadcn@latest add dialog
+```
 
 ## Supabase
 

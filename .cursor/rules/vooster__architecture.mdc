@@ -1,0 +1,197 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Technical Requirements Document (TRD)
+
+## 1. Executive Technical Summary
+
+- **Project Overview**: 'BuddyBudget'은 공동 생활자를 위한 웹 기반 자산·지출 관리 SaaS입니다. Next.js App Router를 활용한 풀스택 애플리케이션으로 구현하며, 백엔드 인프라는 Supabase의 BaaS(Backend as a Service)를 적극적으로 활용하여 개발 속도와 효율성을 극대화합니다. 멀티테넌시 아키텍처를 기반으로 각 'Space' 단위의 데이터를 PostgreSQL의 RLS(Row-Level Security)를 통해 완벽하게 격리합니다.
+- **Core Technology Stack**: Next.js 15, TypeScript, Supabase(PostgreSQL, Auth, Storage, Edge Functions), Drizzle ORM을 핵심 스택으로 사용합니다. UI는 TailwindCSS, shadcn/ui, lucide-react로 구현하며, 데이터 페칭 및 상태 관리는 @tanstack/react-query를 활용합니다. 이메일 발송은 Resend, 구독 결제는 토스페이먼츠를 연동합니다.
+- **Key Technical Objectives**:
+  - **데이터 격리**: Supabase RLS를 통해 사용자 'Space' 간 데이터 접근을 원천 차단하여 멀티테넌시 보안을 확보합니다.
+  - **성능**: 평균 API 응답 시간을 300ms 이내로 유지하고, 대시보드 로딩 속도를 최적화합니다.
+  - **반응형 UI**: 모바일(최소 375px) 우선 접근 방식으로 모든 디바이스에서 최적의 사용자 경험을 제공합니다.
+  - **접근성**: WCAG 2.1 AA 레벨을 준수하여 색 대비, 키보드 접근성 등을 보장합니다.
+- **Critical Technical Assumptions**:
+  - Supabase의 기본 인프라는 MVP 단계의 트래픽을 충분히 감당할 수 있습니다.
+  - Google OAuth는 MVP의 핵심 인증 방식으로 충분하며, 사용자의 가입 허들을 낮출 수 있습니다.
+  - Resend 및 토스페이먼츠의 API는 안정적이며, 주어진 개발 일정 내에 연동이 가능합니다.
+  - PostgreSQL의 Materialized View 기능으로 대시보드 집계 성능 요구사항을 충족할 수 있습니다.
+
+## 2. Tech Stack
+
+| Category                  | Technology / Library                | Reasoning (Why it's chosen for this project)                                                                                                                                    |
+| ------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **프레임워크**            | Next.js 15                          | React 서버 컴포넌트(RSC)를 활용한 서버 중심 아키텍처로 초기 로딩 성능을 최적화하고, 단일 코드베이스에서 프론트엔드와 백엔드(API Routes)를 통합 관리하여 개발 생산성을 높입니다. |
+| **언어**                  | TypeScript                          | 정적 타입 검사를 통해 코드의 안정성과 유지보수성을 향상시키며, Drizzle ORM과의 연계를 통해 데이터베이스 스키마와 쿼리의 타입 안전성을 보장합니다.                               |
+| **백엔드 서비스(BaaS)**   | Supabase                            | PostgreSQL 데이터베이스, 인증, 스토리지, 엣지 함수를 통합 제공하여 인프라 구축 시간을 최소화하고 MVP 개발에 집중할 수 있게 합니다. RLS 기능은 멀티테넌시 구현의 핵심입니다.     |
+| **데이터베이스 ORM**      | Drizzle ORM                         | TypeScript 기반의 경량 SQL 쿼리 빌더로, 타입 안전성을 극대화하고 SQL에 가까운 직관적인 쿼리 작성이 가능하여 데이터베이스 상호작용의 안정성을 높입니다.                          |
+| **UI 스타일링**           | TailwindCSS                         | 유틸리티 우선 접근 방식으로 빠르고 일관된 UI 개발을 지원하며, 커스터마이징이 용이하여 프로젝트 고유의 디자인 시스템을 구축하는 데 효율적입니다.                                 |
+| **UI 컴포넌트**           | shadcn/ui & lucide-react            | 접근성을 준수하는 고품질 UI 컴포넌트 라이브러리로, 개발 속도를 높이고 일관된 디자인을 유지합니다. `lucide-react`는 경량 아이콘을 제공합니다.                                    |
+| **데이터 페칭/상태 관리** | @tanstack/react-query               | 서버 상태 관리를 위한 강력한 솔루션으로, 캐싱, 재시도, 데이터 동기화 로직을 자동화하여 API 통신 코드의 복잡성을 줄이고 사용자 경험을 향상시킵니다.                              |
+| **유틸리티**              | date-fns                            | 경량의 모듈식 날짜/시간 라이브러리로, 필요한 기능만 가져와 사용할 수 있어 번들 크기를 최적화하고 직관적인 API를 제공합니다.                                                     |
+| **이메일 서비스**         | Resend                              | 개발자 친화적인 API를 통해 초대 및 알림 등 트랜잭션 이메일을 안정적으로 발송하기 위해 사용합니다. React Email과의 통합이 용이합니다.                                            |
+| **결제 서비스**           | TossPayments (Subscription Billing) | 국내 사용자에게 친숙한 결제 경험을 제공하고, 구독 결제(Billing) API를 통해 Pro 플랜의 정기 결제 기능을 안정적으로 구현하기 위해 선택합니다.                                     |
+
+## 3. System Architecture Design
+
+### Top-Level building blocks
+
+- **Next.js Application (Frontend & Backend Logic)**: 사용자와 직접 상호작용하는 웹 애플리케이션입니다. React 서버 컴포넌트(RSC)를 통해 UI를 렌더링하고, 클라이언트 컴포넌트에서 사용자 인터랙션을 처리합니다. API Route Handlers를 사용하여 클라이언트의 요청을 처리하고 비즈니스 로직을 수행합니다.
+  - **Sub-building blocks**: UI Components (shadcn/ui), State Management (@tanstack/react-query), API Route Handlers.
+- **Supabase (BaaS Platform)**: 핵심 백엔드 인프라 역할을 수행합니다. 데이터 저장, 사용자 인증, 서버리스 함수 실행 등 백엔드 기능을 종합적으로 제공하여 개발을 가속화합니다.
+  - **Sub-building blocks**: PostgreSQL Database, Supabase Auth, Supabase Edge Functions, Supabase Storage.
+- **Database (PostgreSQL with Drizzle)**: 애플리케이션의 모든 데이터를 저장하는 영구 저장소입니다. Drizzle ORM을 통해 타입 안전하게 데이터에 접근하며, Supabase RLS 정책으로 데이터 접근 제어를 구현합니다.
+  - **Sub-building blocks**: Drizzle ORM (Query Builder), Database Schema, RLS Policies.
+- **External Services (Third-Party Integrations)**: 애플리케이션의 핵심 기능 외에 필요한 부가 기능을 제공하는 외부 서비스입니다.
+  - **Sub-building blocks**: Resend (Email Notifications), TossPayments (Subscription Billing).
+
+### Top-Level Component Interaction Diagram
+
+```mermaid
+graph TD
+    subgraph Browser
+        User[사용자]
+    end
+
+    subgraph Next.js App
+        Frontend[Next.js Frontend - RSC/Client Components]
+        Backend[Next.js Backend - API Route Handlers]
+    end
+
+    subgraph Supabase
+        Auth[Supabase Auth]
+        DB[(Supabase PostgreSQL<br/>w/ Drizzle ORM & RLS)]
+        Functions[Supabase Edge Functions]
+    end
+
+    subgraph External Services
+        Resend[Resend API]
+        Toss[TossPayments API]
+    end
+
+    User -- interacts --> Frontend
+    Frontend -- API Requests --> Backend
+    Frontend -- Direct Call --> Auth
+    Backend -- DB Queries via Drizzle --> DB
+    Backend -- invoke --> Functions
+    Functions -- calls --> Resend
+    Functions -- calls --> Toss
+```
+
+- **사용자 요청 처리**: 사용자는 브라우저를 통해 Next.js 프론트엔드와 상호작용합니다. 데이터 조회나 변경이 필요할 경우, 클라이언트 컴포넌트는 Next.js 백엔드(API Route Handlers)로 API를 요청합니다.
+- **데이터베이스 상호작용**: Next.js 백엔드는 Drizzle ORM을 사용하여 Supabase PostgreSQL 데이터베이스에 쿼리를 실행합니다. 모든 쿼리는 사용자의 인증 정보에 기반한 RLS 정책에 따라 자동으로 필터링되어 데이터 격리를 보장합니다.
+- **인증 처리**: 로그인, 회원가입 등 인증 관련 요청은 Supabase Auth와 직접 통신하여 처리되며, 발급된 JWT는 후속 API 요청 시 인증 토큰으로 사용됩니다.
+- **외부 서비스 연동**: 이메일 발송, 결제 처리와 같이 보안이 중요하거나 외부와 통신이 필요한 로직은 Supabase Edge Function을 통해 실행하여 안전성과 확장성을 확보합니다.
+
+### Code Organization & Convention
+
+**Domain-Driven Organization Strategy**
+
+- **Domain Separation**: `src/domains` 디렉토리 내에 `spaces`, `transactions`, `budgets`, `users` 등 비즈니스 도메인별로 코드를 구성하여 응집도를 높입니다.
+- **Layer-Based Architecture**: 각 도메인 내부는 `actions`(서버 로직), `components`(UI), `lib`(유틸리티), `types` 등으로 계층을 분리하여 관심사를 명확히 합니다.
+- **Feature-Based Modules**: 대시보드, 거래 입력 폼 등 특정 기능을 중심으로 관련된 컴포넌트와 로직을 그룹화합니다.
+- **Shared Components**: 여러 도메인에서 공통으로 사용되는 UI 컴포넌트(`src/components/ui`), 유틸리티 함수(`src/lib`), 타입 정의(`src/types`)는 최상위 디렉토리에 배치하여 재사용성을 극대화합니다.
+
+**Universal File & Folder Structure**
+
+```
+/
+├── public/                     # 정적 에셋 (이미지, 폰트 등)
+└── src/
+    ├── app/                    # Next.js App Router
+    │   ├── (auth)/             # 인증 관련 페이지 (로그인, 가입)
+    │   ├── (dashboard)/[slug]/ # Space 대시보드 관련 페이지
+    │   │   ├── layout.tsx
+    │   │   └── page.tsx
+    │   ├── api/                # API Route Handlers
+    │   └── layout.tsx          # 루트 레이아웃
+    ├── components/
+    │   ├── common/             # 공통 컴포넌트 (Header, Footer 등)
+    │   └── ui/                 # shadcn/ui 컴포넌트
+    ├── domains/                # 핵심 비즈니스 도메인
+    │   ├── spaces/
+    │   │   ├── actions.ts      # Space 관련 서버 액션/API 로직
+    │   │   ├── components/     # Space 관련 UI 컴포넌트
+    │   │   └── types.ts        # Space 관련 타입 정의
+    │   ├── transactions/
+    │   │   └── ...
+    │   └── users/
+    │       └── ...
+    ├── lib/
+    │   ├── db/                 # Drizzle ORM 설정 및 스키마
+    │   │   └── schema.ts
+    │   ├── supabase/           # Supabase 클라이언트 설정
+    │   └── utils.ts            # 전역 유틸리티 함수
+    └── types/
+        └── index.ts            # 전역 타입 정의
+```
+
+### Data Flow & Communication Patterns
+
+- **Client-Server Communication**: 클라이언트는 `@tanstack/react-query`의 `useQuery`와 `useMutation` 훅을 사용하여 Next.js API Route Handlers와 비동기적으로 통신합니다. 서버 액션(Server Actions)을 활용하여 클라이언트 컴포넌트에서 직접 서버 함수를 호출하는 패턴도 적극적으로 사용합니다.
+- **Database Interaction**: 모든 데이터베이스 접근은 Drizzle ORM을 통해 이루어집니다. API Route나 서버 액션 내에서 Drizzle 클라이언트를 사용하여 타입 안전한 쿼리를 실행합니다. 데이터베이스 연결은 Supabase가 관리합니다.
+- **External Service Integration**: 결제 웹훅 처리, 이메일 발송 등 민감하거나 비동기적인 외부 서비스 연동은 Supabase Edge Function을 통해 처리합니다. Next.js 백엔드에서 Edge Function을 `invoke`하는 방식으로 호출합니다.
+- **Real-time Communication**: MVP에서는 실시간 통신이 없으나, 향후 기능 확장 시 Supabase Realtime을 활용하여 대시보드 데이터의 실시간 동기화를 구현할 수 있습니다.
+- **Data Synchronization**: `@tanstack/react-query`의 캐시 무효화(cache invalidation) 전략을 사용하여 데이터 변경(CUD) 후 관련 데이터 조회(R) 쿼리를 자동으로 갱신함으로써 클라이언트와 서버 간의 데이터 정합성을 유지합니다.
+
+## 4. Performance & Optimization Strategy
+
+- **프론트엔드 최적화**: Next.js의 서버 컴포넌트(RSC)를 기본으로 사용하여 서버에서 렌더링을 수행, 클라이언트 JavaScript 번들 크기를 최소화합니다. 정적인 페이지(랜딩페이지 등)는 SSG(Static Site Generation)를 적용하고, `next/image`를 통해 이미지를 최적화합니다.
+- **데이터 페칭 최적화**: `@tanstack/react-query`를 사용하여 API 응답을 클라이언트 측에 캐싱합니다. 동일한 데이터 요청이 반복될 경우 네트워크 요청 없이 캐시된 데이터를 즉시 반환하여 로딩 시간을 단축하고 API 호출 수를 줄입니다.
+- **데이터베이스 성능**: PRD에 명시된 바와 같이, 대시보드의 복잡한 집계 데이터(월별/카테고리별 통계)는 PostgreSQL의 Materialized View를 생성하고 주기적으로(예: 5분마다) 갱신하는 방식으로 처리합니다. 이를 통해 실시간 집계 쿼리로 인한 부하를 방지하고 대시보드 로딩 성능을 보장합니다. `transactions` 테이블의 `space_id`, `created_at` 등 자주 조회되는 컬럼에 인덱스를 생성합니다.
+- **서버리스 아키텍처 활용**: API Route Handlers 및 Supabase Edge Functions는 요청 시에만 실행되는 서버리스 환경에서 동작하므로, 유휴 상태의 리소스 비용이 없고 트래픽에 따라 자동으로 확장되어 효율적인 리소스 관리가 가능합니다.
+
+## 5. Implementation Roadmap & Milestones
+
+### Phase 1: Foundation (MVP Implementation) - Sprint 0 ~ 3 (6주)
+
+- **Core Infrastructure**: Supabase 프로젝트 설정, PostgreSQL 스키마 정의(Drizzle), Next.js 프로젝트 초기 설정 및 기본 레이아웃 구현. (Sprint 0-1)
+- **Essential Features**: 사용자 인증(Google OAuth), Space 생성/관리, 멤버 초대/참여, 거래(수입/지출/이체) CRUD, 예산 설정, 기본 대시보드(잔액, 집행률) 기능 구현. (Sprint 1-3)
+- **Basic Security**: Supabase RLS 정책을 적용하여 Space 단위 데이터 격리 구현.
+- **Development Setup**: GitHub 레포지토리 설정, Vercel 연동을 통한 기본 CI/CD 파이프라인 구축.
+- **Timeline**: 6주
+
+### Phase 2: Feature Enhancement & Monetization - Sprint 4 ~ 5 (2주)
+
+- **Advanced Features**: 유료(Pro) 플랜 기능인 예산 초과 알림(Resend 이메일 연동), 다크 모드 구현.
+- **Monetization**: 토스페이먼츠 Billing API를 연동하여 Pro 플랜 구독 결제 기능 구현.
+- **Performance Optimization**: MVP 기능에 대한 성능 테스트 및 Materialized View 등 최적화 전략 적용.
+- **Enhanced Security**: 결제 관련 보안 강화 및 추가적인 RLS 정책 검토.
+- **Monitoring Implementation**: Vercel Analytics 및 기본 로깅을 통한 모니터링 환경 구축.
+- **Timeline**: 2주 (총 8주 후 런칭)
+
+## 6. Risk Assessment & Mitigation Strategies
+
+### Technical Risk Analysis
+
+- **Technology Risks**:
+  - **리스크**: Supabase RLS 정책의 복잡성. 잘못된 정책 설계 시 데이터 유출 또는 접근 불가 문제 발생 가능.
+  - **Mitigation Strategies**: 개발 초기 단계에 RLS 정책에 대한 철저한 테스트 케이스를 작성하고, 자동화된 테스트를 통해 정책의 정확성을 지속적으로 검증합니다. 동료 코드 리뷰를 통해 정책 로직을 교차 검증합니다.
+- **Performance Risks**:
+  - **리스크**: 거래 데이터 증가 시 대시보드 집계 쿼리 성능 저하로 인한 로딩 속도 지연.
+  - **Mitigation Strategies**: PRD에 명시된 대로 Materialized View를 선제적으로 도입하여 복잡한 집계 연산을 미리 계산해 둡니다. 쿼리 실행 계획을 분석하여 비효율적인 쿼리를 튜닝하고, 필요한 컬럼에 인덱스를 추가합니다.
+- **Security Risks**:
+  - **리스크**: 멤버 초대 과정에서 발생하는 인증 토큰 탈취 또는 오용 가능성.
+  - **Mitigation Strategies**: 초대 링크에 유효 시간이 짧은 일회성 토큰(JWT)을 사용합니다. 이메일 수신자 본인만 링크를 수락할 수 있도록 Google OAuth 인증을 거치게 하여 보안을 강화합니다.
+- **Integration Risks**:
+  - **리스크**: 토스페이먼츠 등 외부 결제 API의 장애 또는 정책 변경으로 인한 결제 기능 중단.
+  - **Mitigation Strategies**: 결제 처리 로직에 대한 예외 처리 및 재시도 메커니즘을 견고하게 구현합니다. 웹훅(Webhook) 요청 실패 시를 대비한 로깅 및 알림 시스템을 구축하여 신속하게 문제를 인지하고 대응할 수 있도록 합니다.
+
+### Project Delivery Risks
+
+- **Timeline Risks**:
+  - **리스크**: 8주라는 MVP 개발 일정이 매우 공격적이어서, 예상치 못한 기술적 난관 발생 시 지연 가능성이 높음.
+  - **Mitigation Strategies**: MVP 기능 범위를 철저히 관리하고, 'NICE TO HAVE' 기능의 우선순위를 조정할 수 있도록 유연성을 확보합니다. 2주 단위 스프린트 회고를 통해 지속적으로 진행 상황을 점검하고 병목 현상을 조기에 해결합니다.
+- **Resource Risks**:
+  - **리스크**: 개발팀이 Supabase RLS, Drizzle ORM 등 특정 기술 스택에 대한 경험이 부족할 경우 학습 곡선으로 인한 개발 속도 저하.
+  - **Mitigation Strategies**: 개발 시작 전, 핵심 기술에 대한 공식 문서 학습 및 PoC(Proof of Concept)를 진행하여 기술적 이해도를 높입니다. 복잡한 부분은 페어 프로그래밍을 통해 지식을 공유하고 리스크를 분산합니다.
+- **Quality Risks**:
+  - **리스크**: 빠른 개발 속도에 치중하여 단위 테스트 및 E2E 테스트 커버리지가 부족해져 런칭 후 버그 발생률 증가.
+  - **Mitigation Strategies**: 인증, 결제, 핵심 데이터 CRUD 등 크리티컬한 기능에 대해서는 반드시 테스트 코드를 작성하는 것을 원칙으로 합니다. 런칭 전 QA 기간을 별도로 확보하여 주요 사용자 시나리오에 대한 테스트를 집중적으로 수행합니다.
+- **Deployment Risks**:
+  - **리스크**: 개발 환경과 프로덕션 환경의 미세한 차이(환경 변수, RLS 정책 등)로 인해 배포 후 예상치 못한 오류 발생.
+  - **Mitigation Strategies**: Vercel의 Preview Deployment 기능을 적극 활용하여 PR(Pull Request)마다 실제 프로덕션과 유사한 환경에서 변경 사항을 사전 검증합니다. 환경 변수 관리를 위한 명확한 프로세스를 수립하고, Supabase 환경(dev, prod) 분리 전략을 고려합니다.
