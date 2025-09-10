@@ -15,6 +15,13 @@
       "when": 1757433746458,
       "tag": "0001_yielding_kabuki",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757496448738,
+      "tag": "0002_cultured_enchantress",
+      "breakpoints": true
     }
   ]
 }
