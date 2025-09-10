@@ -36,10 +36,10 @@ export const listInfiniteCategories = async (params: ListParams) => {
     );
   }
 
-  const filters = [eq(categories.spaceId, spaceId)];
-  if (cursorCond) filters.push(cursorCond);
-  if (q && q.trim()) filters.push(ilike(categories.name, `%${q.trim()}%`));
-  if (kind) filters.push(eq(categories.kind, kind));
+  let whereCond = eq(categories.spaceId, spaceId);
+  if (cursorCond) whereCond = and(whereCond, cursorCond);
+  if (q && q.trim()) whereCond = and(whereCond, ilike(categories.name, `%${q.trim()}%`));
+  if (kind) whereCond = and(whereCond, eq(categories.kind, kind));
 
   const rows = await db
     .select({
@@ -51,7 +51,7 @@ export const listInfiniteCategories = async (params: ListParams) => {
       createdAt: categories.createdAt,
     })
     .from(categories)
-    .where(and(...filters))
+    .where(whereCond)
     .orderBy(desc(categories.createdAt), desc(categories.id))
     .limit(limit + 1);
 
