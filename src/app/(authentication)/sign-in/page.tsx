@@ -23,7 +23,7 @@ const SignInPage = async ({ searchParams }: Props) => {
           <p className='text-sm text-muted-foreground'>Google 계정으로 빠르게 시작하세요</p>
         </div>
 
-        <form action={signInWithGoogle} method='post' className='space-y-4'>
+        <form action={signInWithGoogle} method='POST' className='space-y-4'>
           <input type='hidden' name='next' value={next} />
           <Button type='submit' className='w-full' aria-label='Google로 로그인'>
             Google로 계속하기

@@ -1,8 +1,8 @@
+import { getMySpaces } from '@/app/actions/space';
 import { db } from '@/db/client';
 import { profiles } from '@/db/schema/profiles';
-import { getMySpaces } from '@/app/actions/space';
-import { createClient } from '@/lib/supabase/server';
 import { isSafeInternalPath } from '@/lib/security/redirect';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { NextRequest } from 'next/server';
 
@@ -37,11 +37,12 @@ export const GET = async (req: NextRequest) => {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (!userErr && userData.user) {
     const u = userData.user;
-    const meta = (u.user_metadata as {
-      name?: unknown;
-      full_name?: unknown;
-      avatar_url?: unknown;
-    }) || {};
+    const meta =
+      (u.user_metadata as {
+        name?: unknown;
+        full_name?: unknown;
+        avatar_url?: unknown;
+      }) || {};
     const name =
       typeof meta.name === 'string'
         ? meta.name
@@ -71,6 +72,6 @@ export const GET = async (req: NextRequest) => {
     redirect(`/${spaces[0]!.slug}`);
   }
 
-  // 없으면 스페이스 생성 플로우로 라우팅
-  redirect('/post-sign-in');
+  // 없으면 /home에서 생성 UI 렌더
+  redirect('/home');
 };

@@ -8,4 +8,3 @@ export const buildOAuthRedirect = (baseCallbackUrl: string, next?: string | null
   }
   return base;
 };
-

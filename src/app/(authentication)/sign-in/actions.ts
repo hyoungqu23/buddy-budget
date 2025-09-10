@@ -1,7 +1,7 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
 import { buildOAuthRedirect } from '@/lib/auth/url';
+import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export const signInWithGoogle = async (formData: FormData) => {
@@ -26,5 +26,5 @@ export const signInWithGoogle = async (formData: FormData) => {
 export const signOut = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/sign-in');
+  redirect('/');
 };

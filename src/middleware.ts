@@ -6,12 +6,7 @@ import { NextResponse } from 'next/server';
 const PUBLIC_FILE = /\.(.*)$/;
 
 // Explicit public routes (URL paths)
-const PUBLIC_PATHS = new Set<string>([
-  '/', // landing (keep public; adjust if needed)
-  '/sign-in',
-  '/auth/callback',
-  '/demo',
-]);
+const PUBLIC_PATHS = new Set<string>(['/', '/sign-in', '/auth/callback', '/demo']);
 
 export const middleware = async (req: NextRequest) => {
   const { pathname, search } = req.nextUrl;
@@ -28,6 +23,10 @@ export const middleware = async (req: NextRequest) => {
 
   // Public routes (authentication group etc.)
   if (PUBLIC_PATHS.has(pathname) || pathname.startsWith('/auth/')) {
+    // If already authenticated and visiting sign-in, go to /home
+    if (pathname === '/sign-in' && req.cookies.has('sb-access-token')) {
+      return NextResponse.redirect(new URL('/home', req.url));
+    }
     return NextResponse.next();
   }
 
@@ -35,10 +34,8 @@ export const middleware = async (req: NextRequest) => {
   const hasAccessToken = req.cookies.has('sb-access-token');
 
   if (!hasAccessToken) {
-    const url = new URL('/sign-in', req.url);
-    // preserve target for post-sign-in routing
-    url.searchParams.set('next', pathname + (search || ''));
-    return NextResponse.redirect(url);
+    // Unauthenticated users are sent to landing page
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // If we have an access token, refresh session & sync cookies into the response

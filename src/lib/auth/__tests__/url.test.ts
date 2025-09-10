@@ -11,4 +11,3 @@ describe('buildOAuthRedirect', () => {
     expect(out).toBe('/auth/callback?next=%2Fdashboard%3Fx%3D1');
   });
 });
-

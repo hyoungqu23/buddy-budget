@@ -6,4 +6,3 @@ export const isSafeInternalPath = (p: string | null | undefined): boolean => {
   // basic path sanity; optionally extend with allowlist later
   return true;
 };
-

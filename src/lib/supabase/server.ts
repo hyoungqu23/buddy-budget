@@ -1,7 +1,7 @@
-import "server-only";
+import 'server-only';
 
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export const createClient = async () => {
   const cookieStore = await cookies();
@@ -26,7 +26,7 @@ export const createClient = async () => {
           }
         },
       },
-    }
+    },
   );
 };
 
@@ -36,11 +36,9 @@ export const createPureClient = async () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => {
-          return [];
-        },
+        getAll: () => [],
         setAll: () => {},
       },
-    }
+    },
   );
 };

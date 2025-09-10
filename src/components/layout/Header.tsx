@@ -1,7 +1,9 @@
-"use client";
-import CreateSpaceDialog from "@/components/space/CreateSpaceDialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+'use client';
+
+import { signOut } from '@/app/(authentication)/sign-in/actions';
+import CreateSpaceDialog from '@/components/space/CreateSpaceDialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +11,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { signOut } from "@/app/(authentication)/sign-in/actions";
-import { Bell, ChevronDown } from "lucide-react";
-import Link from "next/link";
+} from '@/components/ui/dropdown-menu';
+import { Bell, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 
 type HeaderProps = {
   currentSpace?: string;
@@ -21,21 +22,21 @@ type HeaderProps = {
 };
 
 const Header = ({
-  currentSpace = "My Space",
+  currentSpace = 'My Space',
   spaces = [],
   defaultCreateOpen = false,
 }: HeaderProps) => {
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:h-16 md:px-6">
-      <div className="flex items-center gap-2">
+    <header className='sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:h-16 md:px-6'>
+      <div className='flex items-center gap-2'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" className="gap-2">
-              <span className="truncate max-w-[140px]">{currentSpace}</span>
-              <ChevronDown className="size-4" />
+            <Button variant='secondary' className='gap-2'>
+              <span className='truncate max-w-[140px]'>{currentSpace}</span>
+              <ChevronDown className='size-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align='start' className='w-56'>
             <DropdownMenuLabel>Switch Space</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {spaces.map((s) => (
@@ -46,42 +47,40 @@ const Header = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <CreateSpaceDialog defaultOpen={defaultCreateOpen}>
-                <span className="flex w-full items-center gap-2">
-                  새 스페이스 만들기
-                </span>
+                <span className='flex w-full items-center gap-2'>새 스페이스 만들기</span>
               </CreateSpaceDialog>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
-        <Button size="icon" variant="ghost" aria-label="Notifications">
-          <Bell className="size-5" />
+      <div className='ml-auto flex items-center gap-2'>
+        <Button size='icon' variant='ghost' aria-label='Notifications'>
+          <Bell className='size-5' />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2">
-              <Avatar className="size-6">
-                <AvatarImage alt="user" />
+            <Button variant='ghost' className='gap-2'>
+              <Avatar className='size-6'>
+                <AvatarImage alt='user' />
                 <AvatarFallback>BB</AvatarFallback>
               </Avatar>
-              <ChevronDown className="size-4" />
+              <ChevronDown className='size-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align='end' className='w-48'>
             <DropdownMenuLabel>Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="#">Profile</Link>
+              <Link href='#'>Profile</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="#">Settings</Link>
+              <Link href='#'>Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <form action={signOut} className="w-full">
-                <button type="submit" className="w-full text-left">
+              <form action={signOut} className='w-full'>
+                <button type='submit' className='w-full text-left'>
                   Log out
                 </button>
               </form>

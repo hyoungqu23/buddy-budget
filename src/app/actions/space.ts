@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { db } from "@/db/client";
-import { spaceMembers, spaces } from "@/db/schema";
-import { slugify } from "@/lib/slug";
-import { createClient } from "@/lib/supabase/server";
-import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { db } from '@/db/client';
+import { spaceMembers, spaces } from '@/db/schema';
+import { slugify } from '@/lib/slug';
+import { createClient } from '@/lib/supabase/server';
+import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
 
 export const getCurrentUserId = async () => {
   const supabase = await createClient();
@@ -30,15 +30,15 @@ export const getMySpaces = async () => {
 };
 
 export const createSpace = async (formData: FormData) => {
-  const name = String(formData.get("name") || "").trim();
+  const name = String(formData.get('name') || '').trim();
   if (!name) {
-    throw new Error("Space name is required");
+    throw new Error('Space name is required');
   }
 
   const userId = await getCurrentUserId();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   // generate unique slug with transaction and retries on conflict
@@ -51,19 +51,17 @@ export const createSpace = async (formData: FormData) => {
           .insert(spaces)
           .values({ name, slug, ownerId: userId })
           .returning({ id: spaces.id, slug: spaces.slug });
-        await tx
-          .insert(spaceMembers)
-          .values({ spaceId: sp.id, userId, role: "owner" });
+        await tx.insert(spaceMembers).values({ spaceId: sp.id, userId, role: 'owner' });
         return sp;
       });
       redirect(`/${result.slug}`);
     } catch (e: any) {
       lastError = e;
-      const msg = String(e?.message || "");
+      const msg = String(e?.message || '');
       if (
-        msg.includes("spaces_slug_unique") ||
-        msg.includes("duplicate key") ||
-        msg.includes("unique")
+        msg.includes('spaces_slug_unique') ||
+        msg.includes('duplicate key') ||
+        msg.includes('unique')
       ) {
         continue;
       }
@@ -71,7 +69,7 @@ export const createSpace = async (formData: FormData) => {
     }
   }
   throw new Error(
-    "Failed to create space" +
-      (lastError ? `: ${String((lastError as any)?.message || lastError)}` : "")
+    'Failed to create space' +
+      (lastError ? `: ${String((lastError as any)?.message || lastError)}` : ''),
   );
 };
