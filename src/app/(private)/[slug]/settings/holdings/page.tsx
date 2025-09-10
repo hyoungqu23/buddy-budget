@@ -13,10 +13,12 @@ const HoldingsSettingsPage = async ({ params }: { params: { slug: string } }) =>
       <h2 className='text-xl font-semibold'>계정(Holdings)</h2>
       <HoldingsClient
         slug={slug}
-        listAction={listInfiniteHoldings}
-        createAction={createHolding}
-        updateAction={updateHolding}
-        deleteAction={deleteHolding}
+        actions={{
+          listAction: listInfiniteHoldings,
+          createAction: createHolding,
+          updateAction: updateHolding,
+          deleteAction: deleteHolding,
+        }}
       />
     </div>
   );

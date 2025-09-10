@@ -1,30 +1,46 @@
 'use client';
-import { useInfiniteQuery, UseInfiniteQueryOptions } from '@tanstack/react-query';
+
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 
-type PageResult<T> = { items: T[]; nextCursor: string | null };
+export type PageResult<T> = { items: T[]; nextCursor: string | null };
 
-type Options<TQueryFnData, TError, TData> = Omit<
-  UseInfiniteQueryOptions<TQueryFnData, TError, PageResult<TData>, PageResult<TData>, any>,
-  'queryKey' | 'getNextPageParam' | 'initialPageParam'
-> & {
-  queryKey: any[];
-  fetchPage: (cursor: string | null) => Promise<PageResult<TData>>;
+type Options<T> = {
+  queryKey: ReadonlyArray<string | number>;
+  fetchPage: (cursor: string | null) => Promise<PageResult<T>>;
   enabled?: boolean;
 };
 
-export const useInfiniteScroll = <T = unknown>(opts: Options<any, any, T>) => {
-  const { queryKey, fetchPage, enabled = true, ...rest } = opts;
+export const useInfiniteScroll = <T = unknown>({
+  queryKey,
+  fetchPage,
+  enabled = true,
+}: Options<T>) => {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    PageResult<T>,
+    Error,
+    PageResult<T>,
+    ReadonlyArray<string | number>,
+    string | null
+  >({
     queryKey,
-    queryFn: ({ pageParam }) => fetchPage((pageParam as string) ?? null),
+    queryFn: ({ pageParam }) => fetchPage(pageParam ?? null),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled,
-    ...rest,
   });
+
+  // Normalize pages so consumers don't depend on library internals
+  type InfiniteShape = { pages: PageResult<T>[] };
+  const dataAny = query.data as unknown;
+  const pages: PageResult<T>[] =
+    dataAny && typeof dataAny === 'object' && dataAny !== null && 'pages' in dataAny
+      ? (dataAny as InfiniteShape).pages
+      : query.data
+        ? [query.data]
+        : [];
 
   useEffect(() => {
     if (!enabled) return;
@@ -44,5 +60,5 @@ export const useInfiniteScroll = <T = unknown>(opts: Options<any, any, T>) => {
     return () => io.disconnect();
   }, [enabled, query.hasNextPage, query.isFetchingNextPage, query]);
 
-  return { ...query, sentinelRef };
+  return { ...query, sentinelRef, pages };
 };

@@ -37,18 +37,13 @@ export const GET = async (req: NextRequest) => {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (!userErr && userData.user) {
     const u = userData.user;
-    const meta =
-      (u.user_metadata as {
-        name?: unknown;
-        full_name?: unknown;
-        avatar_url?: unknown;
-      }) || {};
+    const meta = u.user_metadata || {};
     const name =
       typeof meta.name === 'string'
         ? meta.name
         : typeof meta.full_name === 'string'
-        ? meta.full_name
-        : null;
+          ? meta.full_name
+          : null;
     const avatarUrl = typeof meta.avatar_url === 'string' ? meta.avatar_url : null;
 
     // upsert by user_id unique key

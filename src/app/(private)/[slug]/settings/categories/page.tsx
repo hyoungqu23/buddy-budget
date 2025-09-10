@@ -13,10 +13,12 @@ const CategoriesSettingsPage = async ({ params }: { params: { slug: string } }) 
       <h2 className='text-xl font-semibold'>카테고리</h2>
       <CategoriesClient
         slug={slug}
-        listAction={listInfiniteCategories}
-        createAction={createCategory}
-        updateAction={updateCategory}
-        deleteAction={deleteCategory}
+        actions={{
+          listAction: listInfiniteCategories,
+          createAction: createCategory,
+          updateAction: updateCategory,
+          deleteAction: deleteCategory,
+        }}
       />
     </div>
   );

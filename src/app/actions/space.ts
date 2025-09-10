@@ -44,7 +44,7 @@ export const createSpace = async (formData: FormData) => {
   }
 
   // generate unique slug with transaction and retries on conflict
-  let lastError: unknown = null;
+  let lastError = null;
   for (let i = 0; i < 5; i++) {
     const slug = slugify(name);
     try {

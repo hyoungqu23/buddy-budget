@@ -16,7 +16,7 @@ type ListParams = {
   slug: string;
   limit?: number;
   cursor?: string | null;
-  q?: string; // name search
+  q?: string;
   type?: 'bank' | 'card' | 'cash' | 'etc';
 };
 

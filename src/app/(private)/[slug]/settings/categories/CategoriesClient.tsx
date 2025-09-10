@@ -3,49 +3,46 @@ import { InfiniteList } from '@/components/infinite/InfiniteList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import type { Category } from '@/db/schema';
+import { type PageResult, useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import type { CategoryCreateInput, CategoryUpdateInput } from '@/lib/validation/categories';
 import * as React from 'react';
 
-type PageResult<T> = { items: T[]; nextCursor: string | null };
+type CategoryListItem = Pick<Category, 'id' | 'name' | 'color' | 'kind'>;
 
-type ListAction = (args: {
-  slug: string;
-  cursor?: string | null;
-  limit?: number;
-  q?: string;
-  type?: 'bank' | 'card' | 'cash' | 'etc';
-}) => Promise<PageResult<any>>;
-
-type MutateAction<TArgs extends any[]> = (...args: TArgs) => Promise<any>;
+type Actions = {
+  listAction: (args: {
+    slug: string;
+    cursor?: string | null;
+    limit?: number;
+    q?: string;
+    kind?: 'expense' | 'income';
+  }) => Promise<PageResult<CategoryListItem>>;
+  createAction: (slug: string, input: CategoryCreateInput) => Promise<{ id: string }>;
+  updateAction: (
+    slug: string,
+    id: string,
+    patch: Partial<CategoryUpdateInput>,
+  ) => Promise<{ id: string }>;
+  deleteAction: (slug: string, id: string) => Promise<{ id: string }>;
+};
 
 type Props = {
   slug: string;
-  listAction: ListAction;
-  createAction: MutateAction<
-    [
-      string,
-      {
-        name: string;
-        color: string;
-        type: 'bank' | 'card' | 'cash' | 'etc';
-        currency?: string;
-        openingBalance: number;
-      },
-    ]
-  >;
-  updateAction: MutateAction<[string, string, Partial<{ name: string; color: string }>]>;
-  deleteAction: MutateAction<[string, string]>;
+  actions: Actions;
 };
 
-const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAction }: Props) => {
+const CategoriesClient = ({ slug, actions }: Props) => {
   const [q, setQ] = React.useState('');
-  const [type, setType] = React.useState<'' | 'bank' | 'card' | 'cash' | 'etc'>('');
+  const [kind, setKind] = React.useState<'' | 'expense' | 'income'>('');
 
   const fetchPage = React.useCallback(
-    (cursor: string | null) => listAction({ slug, cursor, limit: 20, q, type: type || undefined }),
-    [slug, q, type, listAction],
+    (cursor: string | null) =>
+      actions.listAction({ slug, cursor, limit: 20, q, kind: kind || undefined }),
+    [slug, q, kind, actions.listAction],
   );
-  const query = useInfiniteScroll({ queryKey: ['holdings', slug, q, type], fetchPage });
+
+  const query = useInfiniteScroll({ queryKey: ['categories', slug, q, kind], fetchPage });
 
   return (
     <div className='space-y-4'>
@@ -53,19 +50,20 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder='계정 검색'
+          placeholder='카테고리 검색'
           className='max-w-xs'
         />
         <select
           className='h-10 rounded-md border bg-background px-3 text-sm'
-          value={type}
-          onChange={(e) => setType(e.target.value as any)}
+          value={kind}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === '' || v === 'expense' || v === 'income') setKind(v);
+          }}
         >
           <option value=''>전체</option>
-          <option value='bank'>은행</option>
-          <option value='card'>카드</option>
-          <option value='cash'>현금</option>
-          <option value='etc'>기타</option>
+          <option value='expense'>지출</option>
+          <option value='income'>수입</option>
         </select>
         <form
           className='ml-auto flex gap-2'
@@ -74,46 +72,34 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
             const fd = new FormData(e.currentTarget as HTMLFormElement);
             const name = String(fd.get('name') || '');
             const color = String(fd.get('color') || '');
-            const type = String(fd.get('type') || '') as 'bank' | 'card' | 'cash' | 'etc';
-            const currency = String(fd.get('currency') || 'KRW');
-            const openingBalance = Number(fd.get('openingBalance') || 0);
-            await createAction(slug, { name, color, type, currency, openingBalance });
+            const k = String(fd.get('kind') || 'expense') as 'expense' | 'income';
+            await actions.createAction(slug, { name, color, kind: k, icon: undefined });
             (e.currentTarget as HTMLFormElement).reset();
           }}
         >
-          <Input name='name' placeholder='새 계정' required className='max-w-[200px]' />
-          <Input name='color' placeholder='#34C759' required className='w-28' />
+          <Input name='name' placeholder='새 카테고리' required className='max-w-[200px]' />
+          <Input name='color' placeholder='#007AFF' required className='w-28' />
           <select
-            name='type'
+            name='kind'
             className='h-10 rounded-md border bg-background px-2 text-sm'
             required
           >
-            <option value='bank'>은행</option>
-            <option value='card'>카드</option>
-            <option value='cash'>현금</option>
-            <option value='etc'>기타</option>
+            <option value='expense'>지출</option>
+            <option value='income'>수입</option>
           </select>
-          <Input
-            name='openingBalance'
-            placeholder='0.00'
-            type='number'
-            step='0.01'
-            className='w-28'
-          />
-          <Input name='currency' placeholder='KRW' className='w-24' />
           <Button type='submit'>추가</Button>
         </form>
       </div>
 
-      <InfiniteList
-        pages={query.data?.pages}
+      <InfiniteList<CategoryListItem>
+        pages={query.pages}
         isLoading={query.isLoading}
         isFetchingNextPage={query.isFetchingNextPage}
         hasNextPage={query.hasNextPage}
         onLoadMore={() => query.fetchNextPage()}
         sentinelRef={query.sentinelRef}
-        emptyText='계정이 없습니다.'
-        renderItem={(it: any) => (
+        emptyText='카테고리가 없습니다.'
+        renderItem={(it: CategoryListItem) => (
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center justify-between'>
@@ -124,7 +110,7 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
                   />
                   {it.name}
                 </span>
-                <span className='text-xs text-muted-foreground'>{it.type}</span>
+                <span className='text-xs text-muted-foreground'>{it.kind}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className='flex gap-2'>
@@ -134,7 +120,7 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
                   const fd = new FormData(e.currentTarget as HTMLFormElement);
                   const name = String(fd.get('name') || '');
                   const color = String(fd.get('color') || '');
-                  await updateAction(slug, it.id, { name, color });
+                  await actions.updateAction(slug, it.id, { name, color });
                 }}
                 className='flex gap-2'
               >
@@ -144,7 +130,11 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
                   수정
                 </Button>
               </form>
-              <Button type='button' variant='destructive' onClick={() => deleteAction(slug, it.id)}>
+              <Button
+                type='button'
+                variant='destructive'
+                onClick={() => actions.deleteAction(slug, it.id)}
+              >
                 삭제
               </Button>
             </CardContent>
@@ -155,4 +145,4 @@ const HoldingsClient = ({ slug, listAction, createAction, updateAction, deleteAc
   );
 };
 
-export default HoldingsClient;
+export default CategoriesClient;

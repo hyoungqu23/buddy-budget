@@ -1,8 +1,10 @@
 'use client';
+
+import type { PageResult } from '@/hooks/use-infinite-scroll';
 import * as React from 'react';
 
-type InfiniteListProps<T> = {
-  pages: { items: T[]; nextCursor: string | null }[] | undefined;
+type InfiniteListProps<T extends { id: string }> = {
+  pages: PageResult<T>[];
   isLoading: boolean;
   isFetchingNextPage: boolean;
   hasNextPage: boolean | undefined;
@@ -12,7 +14,7 @@ type InfiniteListProps<T> = {
   emptyText?: string;
 };
 
-export function InfiniteList<T>(props: InfiniteListProps<T>) {
+export function InfiniteList<T extends { id: string }>(props: InfiniteListProps<T>) {
   const {
     pages,
     isLoading,
@@ -24,7 +26,7 @@ export function InfiniteList<T>(props: InfiniteListProps<T>) {
     emptyText,
   } = props;
 
-  const items = pages?.flatMap((p) => p.items) ?? [];
+  const items = pages.flatMap((p) => p.items);
 
   return (
     <div className='flex flex-col gap-3'>
@@ -35,7 +37,9 @@ export function InfiniteList<T>(props: InfiniteListProps<T>) {
       ) : items.length === 0 ? (
         <div className='text-sm text-muted-foreground'>{emptyText ?? '항목이 없습니다.'}</div>
       ) : (
-        items.map((it, idx) => <React.Fragment key={idx}>{renderItem(it, idx)}</React.Fragment>)
+        items.map((it, idx) => (
+          <React.Fragment key={'id' in it ? it.id : idx}>{renderItem(it, idx)}</React.Fragment>
+        ))
       )}
 
       <div ref={sentinelRef} aria-hidden='true' />
