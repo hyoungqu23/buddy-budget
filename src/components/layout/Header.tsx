@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { signOut } from "@/app/(authentication)/sign-in/actions";
 import { Bell, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
@@ -78,7 +79,13 @@ const Header = ({
               <Link href="#">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <form action={signOut} className="w-full">
+                <button type="submit" className="w-full text-left">
+                  Log out
+                </button>
+              </form>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

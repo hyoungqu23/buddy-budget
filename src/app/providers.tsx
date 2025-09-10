@@ -1,13 +1,9 @@
 // In Next.js, this file would be called: app/providers.tsx
-"use client";
+'use client';
 
 // Since QueryClientProvider relies on useContext under the hood, we have to put 'use client' on top
-import {
-  isServer,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { ThemeProvider } from "next-themes";
+import { isServer, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from 'next-themes';
 
 const makeQueryClient = () => {
   return new QueryClient({
@@ -45,12 +41,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   const queryClient = getQueryClient();
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </ThemeProvider>
   );
