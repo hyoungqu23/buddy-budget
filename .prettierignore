@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+dist/
+build/
+coverage/
+.turbo/
+.DS_Store
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+public/*.png
+public/*.jpg
+
