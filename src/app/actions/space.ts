@@ -5,6 +5,7 @@ import { members } from '@/db/schema/members';
 import { spaces } from '@/db/schema/spaces';
 import { slugify } from '@/lib/slug';
 import { createClient } from '@/lib/supabase/server';
+import { updateSpaceSchema, type UpdateSpaceGeneralInput } from '@/lib/validation/space';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
@@ -89,4 +90,41 @@ export const assertSpaceAccess = async (slug: string) => {
   const row = rows[0];
   if (!row?.id) throw new Error('Space not found or no access');
   return { spaceId: row.id, slug: row.slug };
+};
+
+export const updateSpaceGeneral = async (currentSlug: string, input: UpdateSpaceGeneralInput) => {
+  const parsed = updateSpaceSchema.safeParse(input);
+  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message || 'Invalid input');
+  const data = parsed.data;
+
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthorized');
+
+  const rows = await db
+    .select({ id: spaces.id })
+    .from(spaces)
+    .leftJoin(members, eq(members.spaceId, spaces.id))
+    .where(and(eq(spaces.slug, currentSlug), eq(members.userId, userId)))
+    .limit(1);
+  if (!rows[0]?.id) throw new Error('권한이 없습니다');
+
+  try {
+    const [updated] = await db
+      .update(spaces)
+      .set({ name: data.name, slug: data.slug })
+      .where(eq(spaces.id, rows[0].id))
+      .returning({ slug: spaces.slug });
+
+    if (!updated) throw new Error('업데이트에 실패했습니다');
+    if (updated.slug !== currentSlug) {
+      redirect(`/${updated.slug}`);
+    }
+    return updated;
+  } catch (e) {
+    const msg = String(e instanceof Error ? e.message : e);
+    if (msg.includes('spaces_slug_unique') || msg.includes('duplicate key')) {
+      throw new Error('이미 사용 중인 슬러그입니다');
+    }
+    throw e;
+  }
 };
