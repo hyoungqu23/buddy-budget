@@ -56,9 +56,9 @@ export const createSpace = async (formData: FormData) => {
         return sp;
       });
       redirect(`/${result.slug}`);
-    } catch (e: any) {
+    } catch (e) {
       lastError = e;
-      const msg = String(e?.message || '');
+      const msg = String(e instanceof Error ? e.message : e);
       if (
         msg.includes('spaces_slug_unique') ||
         msg.includes('duplicate key') ||
@@ -71,7 +71,7 @@ export const createSpace = async (formData: FormData) => {
   }
   throw new Error(
     'Failed to create space' +
-      (lastError ? `: ${String((lastError as any)?.message || lastError)}` : ''),
+      (lastError ? `: ${String(lastError instanceof Error ? lastError.message : lastError)}` : ''),
   );
 };
 

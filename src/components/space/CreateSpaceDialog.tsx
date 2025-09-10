@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { createSpace } from "@/app/actions/space";
-import { Button } from "@/components/ui/button";
+import { createSpace } from '@/app/actions/space';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -16,15 +16,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const schema = z.object({
-  name: z.string().min(1, "스페이스 이름을 입력하세요"),
+  name: z.string().min(1, '스페이스 이름을 입력하세요'),
 });
 
 type Props = {
@@ -33,15 +33,11 @@ type Props = {
   children?: React.ReactNode;
 };
 
-const CreateSpaceDialog = ({
-  defaultOpen = false,
-  triggerClassName,
-  children,
-}: Props) => {
+const CreateSpaceDialog = ({ defaultOpen = false, triggerClassName, children }: Props) => {
   const [open, setOpen] = useState(Boolean(defaultOpen));
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "" },
+    defaultValues: { name: '' },
   });
 
   return (
@@ -50,7 +46,7 @@ const CreateSpaceDialog = ({
         {children ? (
           children
         ) : (
-          <Button variant="secondary" className={triggerClassName}>
+          <Button variant='secondary' className={triggerClassName}>
             새 스페이스 만들기
           </Button>
         )}
@@ -64,31 +60,37 @@ const CreateSpaceDialog = ({
             onSubmit={form.handleSubmit(async (values) => {
               try {
                 const fd = new FormData();
-                fd.set("name", values.name);
+                fd.set('name', values.name);
                 await createSpace(fd); // redirect on success
-              } catch (e: any) {
-                form.setError("name", {
-                  message: e?.message || "생성에 실패했습니다",
-                });
+              } catch (e) {
+                if (e instanceof Error) {
+                  form.setError('name', {
+                    message: e.message || '생성에 실패했습니다',
+                  });
+                } else {
+                  form.setError('name', {
+                    message: '생성에 실패했습니다',
+                  });
+                }
               }
             })}
-            className="space-y-4"
+            className='space-y-4'
           >
             <FormField
               control={form.control}
-              name="name"
+              name='name'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>스페이스 이름</FormLabel>
                   <FormControl>
-                    <Input placeholder="예: 신림 3인하우스" {...field} />
+                    <Input placeholder='예: 신림 3인하우스' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex justify-end">
-              <Button type="submit">만들기</Button>
+            <div className='flex justify-end'>
+              <Button type='submit'>만들기</Button>
             </div>
           </form>
         </Form>
