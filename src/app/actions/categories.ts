@@ -11,6 +11,7 @@ import {
   categoryUpdateSchema,
 } from '@/lib/validation/categories';
 import { and, desc, eq, ilike, lt, or } from 'drizzle-orm';
+import { mapUniqueNameError } from '@/lib/errors';
 
 type ListParams = {
   slug: string;
@@ -87,9 +88,8 @@ export const createCategory = async (slug: string, input: CategoryCreateInput) =
     return row;
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
-    if (msg.includes('u_categories_space_name') || msg.includes('duplicate key')) {
-      throw new Error('이미 존재하는 이름입니다');
-    }
+    const friendly = mapUniqueNameError(msg, ['u_categories_space_name']);
+    if (friendly) throw new Error(friendly);
     throw e;
   }
 };
@@ -108,9 +108,8 @@ export const updateCategory = async (slug: string, id: string, input: CategoryUp
     return row;
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
-    if (msg.includes('u_categories_space_name') || msg.includes('duplicate key')) {
-      throw new Error('이미 존재하는 이름입니다');
-    }
+    const friendly = mapUniqueNameError(msg, ['u_categories_space_name']);
+    if (friendly) throw new Error(friendly);
     throw e;
   }
 };
