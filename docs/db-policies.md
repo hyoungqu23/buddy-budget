@@ -144,3 +144,58 @@ create policy "tx_delete_members" on transactions
 
 - 금액, 타입별 정합성(이체 from≠to 등)은 애플리케이션 레벨 검증으로 처리합니다.
 - 집계 시 이체는 수입/지출 집계에서 제외되는 점을 고려해 쿼리를 작성하세요.
+
+---
+
+BuddyBudget — DB RLS 정책(Budgets)
+
+개요
+
+- Space 멤버만 budgets/budgets_history 접근이 가능하도록 RLS를 구성합니다.
+- budgets_history는 서버 액션을 통해서만 INSERT 되며, 클라이언트에서 직접 쓰지 않습니다.
+
+SQL
+
+```
+alter table budgets enable row level security;
+alter table budgets_history enable row level security;
+
+-- SELECT: space 멤버만 조회
+create policy "budgets_select_members" on budgets
+  for select using (exists(
+    select 1 from members m where m.space_id = budgets.space_id and m.user_id = auth.uid()
+  ));
+
+create policy "budgets_history_select_members" on budgets_history
+  for select using (exists(
+    select 1 from budgets b
+    where b.id = budgets_history.budget_id
+      and exists(
+        select 1 from members m where m.space_id = b.space_id and m.user_id = auth.uid()
+      )
+  ));
+
+-- INSERT/UPDATE/DELETE: space 멤버만 가능 (서버 액션이 교차 인가 검증 수행)
+create policy "budgets_cud_members" on budgets
+  for all using (exists(
+    select 1 from members m where m.space_id = budgets.space_id and m.user_id = auth.uid()
+  )) with check (exists(
+    select 1 from members m where m.space_id = budgets.space_id and m.user_id = auth.uid()
+  ));
+
+-- budgets_history는 서버 액션 트랜잭션으로만 기록 (옵션: INSERT 허용)
+create policy "budgets_history_insert_members" on budgets_history
+  for insert with check (exists(
+    select 1 from budgets b
+    where b.id = budgets_history.budget_id
+      and exists(
+        select 1 from members m where m.space_id = b.space_id and m.user_id = auth.uid()
+      )
+  ));
+```
+
+비고
+
+- 애플리케이션 검증으로 `categories.kind = 'expense'`만 예산 허용.
+- 모든 CUD 쿼리는 `space_id` 범위를 WHERE에 포함.
+- 업서트/수정 시 `budgets_history`에 prev/new 금액을 기록하며 트랜잭션으로 원자성 보장.
