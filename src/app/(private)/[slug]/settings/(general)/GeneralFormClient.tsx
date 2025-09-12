@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
 import type { GeneralFormState } from './actions';
 
 type Props = {
@@ -27,11 +27,23 @@ const GeneralFormClient = ({ slug, defaultName, defaultSlug, action }: Props) =>
       toast({ description: '저장했어요.' });
       if (state.slug && state.slug !== slug) {
         router.replace(`/${state.slug}/settings/(general)`);
+      } else {
+        // 슬러그 변경이 없을 때도 서버 컴포넌트 갱신
+        router.refresh();
       }
     } else if (state.error) {
       toast({ description: state.error });
     }
   }, [state, slug, router]);
+
+  const Submit = () => {
+    const { pending } = useFormStatus();
+    return (
+      <Button type='submit' disabled={pending}>
+        {pending ? '저장 중…' : '저장'}
+      </Button>
+    );
+  };
 
   return (
     <form action={formAction} className='space-y-4'>
@@ -64,7 +76,7 @@ const GeneralFormClient = ({ slug, defaultName, defaultSlug, action }: Props) =>
           </p>
         )}
       </div>
-      <Button type='submit'>저장</Button>
+      <Submit />
     </form>
   );
 };

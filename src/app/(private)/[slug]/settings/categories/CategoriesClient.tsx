@@ -2,6 +2,7 @@
 import { InfiniteList } from '@/components/infinite/InfiniteList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import type { Category } from '@/db/schema';
 import { type PageResult, useInfiniteScroll } from '@/hooks/use-infinite-scroll';
@@ -149,22 +150,25 @@ const CategoriesClient = ({ slug, actions }: Props) => {
                   수정
                 </Button>
               </form>
-              <Button
-                type='button'
-                variant='destructive'
-                onClick={async () => {
-                  if (!confirm('정말 삭제하시겠어요?')) return;
+              <ConfirmDialog
+                title='카테고리 삭제'
+                description='삭제하면 되돌릴 수 없어요.'
+                onConfirm={async () => {
                   try {
                     await actions.deleteAction(slug, it.id);
                     toast({ description: '카테고리를 삭제했어요.' });
+                    await query.refetch();
                   } catch (err) {
                     const msg = err instanceof Error ? err.message : '삭제 중 오류가 발생했어요';
                     toast({ description: msg });
                   }
                 }}
-              >
-                삭제
-              </Button>
+                trigger={
+                  <Button type='button' variant='destructive'>
+                    삭제
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         )}

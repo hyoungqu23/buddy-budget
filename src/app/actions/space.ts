@@ -108,46 +108,10 @@ export const getSpaceGeneral = async (slug: string) => {
   return { id: row.id, name: row.name, slug: row.slug };
 };
 
-export const updateSpaceGeneral = async (currentSlug: string, input: UpdateSpaceGeneralInput) => {
-  const parsed = updateSpaceSchema.safeParse(input);
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message || 'Invalid input');
-  const data = parsed.data;
-
-  const userId = await getCurrentUserId();
-  if (!userId) throw new Error('Unauthorized');
-
-  const rows = await db
-    .select({ id: spaces.id })
-    .from(spaces)
-    .leftJoin(members, eq(members.spaceId, spaces.id))
-    .where(and(eq(spaces.slug, currentSlug), eq(members.userId, userId)))
-    .limit(1);
-  if (!rows[0]?.id) throw new Error('권한이 없습니다');
-
-  try {
-    const [updated] = await db
-      .update(spaces)
-      .set({ name: data.name, slug: data.slug })
-      .where(eq(spaces.id, rows[0].id))
-      .returning({ slug: spaces.slug });
-
-    if (!updated) throw new Error('업데이트에 실패했습니다');
-    if (updated.slug !== currentSlug) {
-      redirect(`/${updated.slug}`);
-    }
-    return updated;
-  } catch (e) {
-    const msg = String(e instanceof Error ? e.message : e);
-    if (msg.includes('spaces_slug_unique') || msg.includes('duplicate key')) {
-      throw new Error('이미 사용 중인 슬러그입니다');
-    }
-    throw e;
-  }
-};
-
-export const updateSpaceGeneralNoRedirect = async (
+export const updateSpaceGeneral = async (
   currentSlug: string,
   input: UpdateSpaceGeneralInput,
+  options?: { redirect?: boolean },
 ) => {
   const parsed = updateSpaceSchema.safeParse(input);
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message || 'Invalid input');
@@ -172,6 +136,9 @@ export const updateSpaceGeneralNoRedirect = async (
       .returning({ slug: spaces.slug });
 
     if (!updated) throw new Error('업데이트에 실패했습니다');
+    if (options?.redirect && updated.slug !== currentSlug) {
+      redirect(`/${updated.slug}`);
+    }
     return updated;
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
@@ -181,3 +148,9 @@ export const updateSpaceGeneralNoRedirect = async (
     throw e;
   }
 };
+
+// Backward-compat: delegate to unified function without redirect
+export const updateSpaceGeneralNoRedirect = async (
+  currentSlug: string,
+  input: UpdateSpaceGeneralInput,
+) => updateSpaceGeneral(currentSlug, input, { redirect: false });
