@@ -4,7 +4,8 @@ import BudgetCard from '@/components/dashboard/BudgetCard';
 import QuickAddWidget from '@/components/dashboard/QuickAddWidget';
 import TransactionList from '@/components/dashboard/TransactionList';
 
-const DashboardPage = () => {
+const DashboardPage = async ({ params }: { params: { slug: string } }) => {
+  const slug = params.slug;
   return (
     <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
       <div className='lg:col-span-2 grid grid-cols-1 gap-4'>
@@ -15,7 +16,7 @@ const DashboardPage = () => {
         <AccountCard />
       </div>
       <div className='lg:col-span-2'>
-        <BudgetCard />
+        <BudgetCard slug={slug} />
       </div>
       <div className='lg:col-span-3'>
         <TransactionList />
